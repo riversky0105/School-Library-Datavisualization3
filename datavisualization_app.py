@@ -37,6 +37,58 @@ def load_data():
 df1, df2, df3 = load_data()
 
 # ---------------------------
+# 📊 전체 연도 확률 분포표 및 기댓값·분산·표준편차 (머신러닝 기능 위로 이동)
+# ---------------------------
+st.subheader("📊 전체 연도 확률 분포표 및 기댓값·분산·표준편차")
+st.markdown("""
+2011년부터 2023년까지의 학교급별 1관당 방문자수를 **하나의 확률 분포**로 보고 계산했습니다.  
+아래 표는 각 연도·학교급의 방문자수와 그 비율(확률 P)을 나타냅니다.
+""")
+
+visit_cols = [col for col in df3.columns if ".3" in col]
+df_all_visit = df3[df3['학교급별(1)'].isin(['초등학교', '중학교', '고등학교'])][['학교급별(1)'] + visit_cols].copy()
+df_all_visit = df_all_visit.melt(id_vars='학교급별(1)', var_name='연도', value_name='1관당 방문자수')
+
+df_all_visit['연도'] = df_all_visit['연도'].str.replace('.3', '', regex=False).astype(int)
+df_all_visit['1관당 방문자수'] = df_all_visit['1관당 방문자수'].astype(float)
+
+total_all = df_all_visit['1관당 방문자수'].sum()
+df_all_visit['확률(P)'] = df_all_visit['1관당 방문자수'] / total_all
+
+E_X_all = (df_all_visit['1관당 방문자수'] * df_all_visit['확률(P)']).sum()
+E_X2_all = ((df_all_visit['1관당 방문자수']**2) * df_all_visit['확률(P)']).sum()
+V_X_all = E_X2_all - (E_X_all**2)
+Std_X_all = np.sqrt(V_X_all)
+
+st.dataframe(df_all_visit.head())
+
+with st.expander("📐 풀이 자세히 보기"):
+    st.markdown("""
+    **✔ 기댓값(E[X])**  
+    각 방문자수 × 확률을 모두 더한 값입니다.
+    """)
+    E_steps = [f"({row['1관당 방문자수']:,.0f}×{row['확률(P)']:.4f})" for _, row in df_all_visit.iterrows()]
+    st.code("E[X] = " + " + ".join(E_steps) + f"\n= {E_X_all:,.2f}")
+
+    st.markdown("""
+    **✔ 분산(V[X])**  
+    각 방문자수의 제곱 × 확률을 모두 더한 값에서, (E[X])²을 뺀 값입니다.
+    """)
+    Var_steps = [f"({row['1관당 방문자수']:,.0f}²×{row['확률(P)']:.4f})" for _, row in df_all_visit.iterrows()]
+    st.code("V[X] = " + " + ".join(Var_steps) +
+            f"\n- (E[X])²\n= {E_X2_all:,.2f} - ({E_X_all:,.2f})²\n= {V_X_all:,.2f}")
+
+    st.markdown("""
+    **✔ 표준편차(σ[X])**  
+    분산의 양의 제곱근입니다.
+    """)
+    st.code(f"σ[X] = √V[X] = √{V_X_all:,.2f} ≈ {Std_X_all:,.2f}")
+
+st.success(f"✅ **기댓값(E[X]) ≈ {E_X_all:,.2f}명**")
+st.info(f"✅ **분산(V[X]) ≈ {V_X_all:,.2f}**")
+st.warning(f"✅ **표준편차(σ[X]) ≈ {Std_X_all:,.2f}명**")
+
+# ---------------------------
 # ✅ 학교 단위 데이터 전처리
 # ---------------------------
 st.subheader("✅ 데이터 전처리 및 병합 상태")
@@ -152,62 +204,3 @@ step = max(500, (y_max - y_min) // 8)
 ax3.set_yticks(np.arange(0, y_max + step, step))
 ax3.get_yaxis().set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
 st.pyplot(fig3)
-
-# ---------------------------
-# 📄 데이터 테이블 출력
-# ---------------------------
-st.subheader("📄 분석 데이터 테이블")
-st.markdown("학교 단위 분석 및 전국 추세 분석에 사용된 원천 데이터입니다.")
-st.dataframe(df_merge)
-
-# =====================================================
-# ✅ [추가 기능] 전체 연도 확률 분포표 및 기댓값·분산·표준편차 (풀이 자세히 보기)
-# =====================================================
-st.subheader("📊 전체 연도 확률 분포표 및 기댓값·분산·표준편차")
-st.markdown("""
-2011년부터 2023년까지의 학교급별 1관당 방문자수를 **하나의 확률 분포**로 보고 계산했습니다.  
-아래 표는 각 연도·학교급의 방문자수와 그 비율(확률 P)을 나타냅니다.
-""")
-
-visit_cols = [col for col in df3.columns if ".3" in col]
-df_all_visit = df3[df3['학교급별(1)'].isin(['초등학교', '중학교', '고등학교'])][['학교급별(1)'] + visit_cols].copy()
-df_all_visit = df_all_visit.melt(id_vars='학교급별(1)', var_name='연도', value_name='1관당 방문자수')
-
-df_all_visit['연도'] = df_all_visit['연도'].str.replace('.3', '', regex=False).astype(int)
-df_all_visit['1관당 방문자수'] = df_all_visit['1관당 방문자수'].astype(float)
-
-total_all = df_all_visit['1관당 방문자수'].sum()
-df_all_visit['확률(P)'] = df_all_visit['1관당 방문자수'] / total_all
-
-E_X_all = (df_all_visit['1관당 방문자수'] * df_all_visit['확률(P)']).sum()
-E_X2_all = ((df_all_visit['1관당 방문자수']**2) * df_all_visit['확률(P)']).sum()
-V_X_all = E_X2_all - (E_X_all**2)
-Std_X_all = np.sqrt(V_X_all)
-
-st.dataframe(df_all_visit.head())
-
-with st.expander("📐 풀이 자세히 보기"):
-    st.markdown("""
-    **✔ 기댓값(E[X])**  
-    각 방문자수 × 확률을 모두 더한 값입니다.
-    """)
-    E_steps = [f"({row['1관당 방문자수']:,.0f}×{row['확률(P)']:.4f})" for _, row in df_all_visit.iterrows()]
-    st.code("E[X] = " + " + ".join(E_steps) + f"\n= {E_X_all:,.2f}")
-
-    st.markdown("""
-    **✔ 분산(V[X])**  
-    각 방문자수의 제곱 × 확률을 모두 더한 값에서, (E[X])²을 뺀 값입니다.
-    """)
-    Var_steps = [f"({row['1관당 방문자수']:,.0f}²×{row['확률(P)']:.4f})" for _, row in df_all_visit.iterrows()]
-    st.code("V[X] = " + " + ".join(Var_steps) +
-            f"\n- (E[X])²\n= {E_X2_all:,.2f} - ({E_X_all:,.2f})²\n= {V_X_all:,.2f}")
-
-    st.markdown("""
-    **✔ 표준편차(σ[X])**  
-    분산의 양의 제곱근입니다.
-    """)
-    st.code(f"σ[X] = √V[X] = √{V_X_all:,.2f} ≈ {Std_X_all:,.2f}")
-
-st.success(f"✅ **기댓값(E[X]) ≈ {E_X_all:,.2f}명**")
-st.info(f"✅ **분산(V[X]) ≈ {V_X_all:,.2f}**")
-st.warning(f"✅ **표준편차(σ[X]) ≈ {Std_X_all:,.2f}명**")
