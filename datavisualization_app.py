@@ -121,7 +121,6 @@ df_merge_renamed = df_merge.rename(columns={
     '도서예산(자료구입비)': '도서예산\n(자료구입비)'
 })
 
-# ✅ X에서 rename된 컬럼명 그대로 사용
 X = df_merge_renamed[['장서수\n(인쇄)', '사서수', '도서예산\n(자료구입비)', '1인당\n대출자료수']].copy()
 y = df_merge_renamed['대출자수']
 
@@ -138,7 +137,7 @@ st.success(f"✅ 예측 오차(MSE): **{mse:,.0f}** | 정확도(R²): **{r2:.4f}
 
 importance = pd.Series(model.feature_importances_, index=X.columns)
 
-fig, ax = plt.subplots(figsize=(6, 3.5))  # ✅ 그래프 크기 유지
+fig, ax = plt.subplots(figsize=(6, 3.5))
 importance.sort_values().plot.barh(ax=ax, color='skyblue')
 ax.set_title("학교 단위: RandomForest 변수 중요도", fontproperties=font_prop, fontsize=12)
 ax.set_xlabel("중요도", fontproperties=font_prop, fontsize=10)
@@ -176,7 +175,7 @@ for school_type in ['초등학교', '중학교', '고등학교']:
 ax2.set_title("연도별 학교급별 1관당 방문자수 추세", fontproperties=font_prop)
 ax2.set_xlabel("연도", fontproperties=font_prop)
 ax2.set_ylabel("1관당 방문자수", fontproperties=font_prop)
-ax2.legend(prop=font_prop, loc='upper left')
+ax2.legend(prop=font_prop, loc='upper right')  # ✅ 오른쪽 맨 위로 변경
 ax2.grid(True, linestyle='--', alpha=0.5)
 plt.tight_layout()
 st.pyplot(fig2, use_container_width=False)
@@ -203,6 +202,6 @@ ax3.set_title("중·고등학교 연도별 1관당 방문자수 추세 (확대)"
 ax3.set_xlabel("연도", fontproperties=font_prop)
 ax3.set_ylabel("1관당 방문자수", fontproperties=font_prop)
 ax3.grid(True, linestyle='--', alpha=0.5)
-ax3.legend(prop=font_prop, loc='upper left')
+ax3.legend(prop=font_prop, loc='upper right')  # ✅ 오른쪽 맨 위로 변경
 plt.tight_layout()
 st.pyplot(fig3, use_container_width=False)
