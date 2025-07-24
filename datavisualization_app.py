@@ -43,12 +43,12 @@ st.subheader("📊 전체 연도별 학교도서관 이용자수 분포와 통�
 st.markdown("""
 2011년부터 2023년까지의 학교급별 **1관당 이용자수**를 하나의 확률 분포로 보고,  
 이를 바탕으로 **기댓값(평균)**, **분산**, **표준편차**를 계산했습니다.  
-아래 표는 각 연도·학교급의 방문자수와 해당 비율(확률 P)을 보여줍니다.
+아래 표는 각 연도·학교급의 이용자수와 해당 비율(확률 P)을 보여줍니다.
 """)
 
 visit_cols = [col for col in df3.columns if ".3" in col]
 df_all_visit = df3[df3['학교급별(1)'].isin(['초등학교', '중학교', '고등학교'])][['학교급별(1)'] + visit_cols].copy()
-df_all_visit = df_all_visit.melt(id_vars='학교급별(1)', var_name='연도', value_name='1관당 방문자수')
+df_all_visit = df_all_visit.melt(id_vars='학교급별(1)', var_name='연도', value_name='1관당 이용자수')
 
 df_all_visit['연도'] = df_all_visit['연도'].str.replace('.3', '', regex=False).astype(int)
 df_all_visit['1관당 이용자수'] = df_all_visit['1관당 이용자수'].astype(float)
@@ -68,14 +68,14 @@ with st.expander("📐 계산 과정 자세히 보기"):
     **✔ 기댓값(E[X])**  
     각 이용자수 × 확률을 모두 더한 값입니다.
     """)
-    E_steps = [f"({row['1관당 방문자수']:,.0f}×{row['확률(P)']:.4f})" for _, row in df_all_visit.iterrows()]
+    E_steps = [f"({row['1관당 이용자수']:,.0f}×{row['확률(P)']:.4f})" for _, row in df_all_visit.iterrows()]
     st.code("E[X] = " + " + ".join(E_steps) + f"\n= {E_X_all:,.2f}")
 
     st.markdown("""
     **✔ 분산(V[X])**  
     각 이용자수의 제곱 × 확률을 모두 더한 값에서, (E[X])²을 뺀 값입니다.
     """)
-    Var_steps = [f"({row['1관당 방문자수']:,.0f}²×{row['확률(P)']:.4f})" for _, row in df_all_visit.iterrows()]
+    Var_steps = [f"({row['1관당 이용자수']:,.0f}²×{row['확률(P)']:.4f})" for _, row in df_all_visit.iterrows()]
     st.code("V[X] = " + " + ".join(Var_steps) +
             f"\n- (E[X])²\n= {E_X2_all:,.2f} - ({E_X_all:,.2f})²\n= {V_X_all:,.2f}")
 
@@ -92,9 +92,9 @@ st.warning(f"✅ **표준편차(σ[X]) ≈ {Std_X_all:,.2f}명**")
 # ---------------------------
 # ✅ 데이터 전처리 및 병합
 # ---------------------------
-st.subheader("✅ 학교 단위 데이터 전처리 및 병합")
+st.subheader("✅ 학교 도서관 데이터 전처리 및 병합")
 st.markdown("""
-전국 및 서울시 학교 단위 데이터를 **이용자수 중심**으로 정리·병합하여 분석에 활용했습니다.
+전국 및 서울시 학교 도서관 데이터를 **이용자수 중심**으로 정리·병합하여 분석에 활용했습니다.
 """)
 
 df1_clean = df1[['도서관명', '장서수(인쇄)', '사서수', '대출자수', '대출권수', '도서예산(자료구입비)']].copy()
@@ -114,9 +114,9 @@ st.dataframe(df_merge.head(), use_container_width=True, height=200)
 # ---------------------------
 # 🔍 변수 중요도 분석
 # ---------------------------
-st.subheader("🔍 학교 도서관 이용자수 변수 중요도 분석")
+st.subheader("🔍 학교 도서관 이용자수 영향 요인 중요도 분석")
 st.markdown("""
-**학교 도서관**의 **대출자수(이용자수)**에 영향을 미치는 요인을  
+**학교 도서관**의 **이용자수(대출자수)**에 영향을 미치는 주요 요인을  
 **RandomForest 알고리즘**으로 분석했습니다.
 """)
 
@@ -144,9 +144,9 @@ importance = pd.Series(model.feature_importances_, index=X.columns)
 
 fig, ax = plt.subplots(figsize=(6, 3.5))
 importance.sort_values().plot.barh(ax=ax, color='skyblue')
-ax.set_title("학교 단위: RandomForest 변수 중요도", fontproperties=font_prop, fontsize=12)
+ax.set_title("학교 도서관 이용자수 영향 요인 중요도", fontproperties=font_prop, fontsize=12)
 ax.set_xlabel("중요도", fontproperties=font_prop, fontsize=10)
-ax.set_ylabel("변수", fontproperties=font_prop, fontsize=10)
+ax.set_ylabel("요인", fontproperties=font_prop, fontsize=10)
 ax.set_yticklabels(importance.sort_values().index, fontproperties=font_prop, fontsize=10)
 plt.tight_layout()
 st.pyplot(fig, use_container_width=False)
@@ -154,34 +154,34 @@ st.pyplot(fig, use_container_width=False)
 # ---------------------------
 # 📈 연도별 추세 분석
 # ---------------------------
-st.subheader("📈 전국 학교도서관 연도별 추세 분석")
+st.subheader("📈 전국 학교도서관 연도별 이용자수 추세 분석")
 st.markdown("""
-학교급(초·중·고)별 **연도별 1관당 방문자수 변화**를 비교했습니다.
+학교급(초·중·고)별 **연도별 1관당 이용자수 변화**를 비교했습니다.
 """)
 
 df3_clean = df3[df3['학교급별(1)'].isin(['초등학교', '중학교', '고등학교'])].copy()
 visit_cols = [col for col in df3_clean.columns if ".3" in col]
 df3_visit = df3_clean[['학교급별(1)'] + visit_cols].copy()
-df3_visit = df3_visit.melt(id_vars='학교급별(1)', var_name='연도', value_name='1관당 방문자수')
+df3_visit = df3_visit.melt(id_vars='학교급별(1)', var_name='연도', value_name='1관당 이용자수')
 
 df3_visit['연도'] = df3_visit['연도'].str.replace('.3', '', regex=False).astype(int)
-df3_visit['1관당 방문자수'] = df3_visit['1관당 방문자수'].astype(float)
+df3_visit['1관당 이용자수'] = df3_visit['1관당 이용자수'].astype(float)
 
 color_map = {'초등학교': 'green', '중학교': 'orange', '고등학교': 'blue'}
 
 fig2, ax2 = plt.subplots(figsize=(6, 3.5))
 for school_type in ['초등학교', '중학교', '고등학교']:
     data = df3_visit[df3_visit['학교급별(1)'] == school_type]
-    ax2.plot(data['연도'], data['1관당 방문자수'],
+    ax2.plot(data['연도'], data['1관당 이용자수'],
              color=color_map[school_type],
              linestyle='-',
              marker='o',
              linewidth=2,
              label=school_type)
 
-ax2.set_title("연도별 학교급별 1관당 방문자수 추세", fontproperties=font_prop)
+ax2.set_title("연도별 학교급별 1관당 이용자수 추세", fontproperties=font_prop)
 ax2.set_xlabel("연도", fontproperties=font_prop)
-ax2.set_ylabel("1관당 방문자수", fontproperties=font_prop)
+ax2.set_ylabel("1관당 이용자수", fontproperties=font_prop)
 ax2.legend(prop=font_prop, loc='upper right')
 ax2.grid(True, linestyle='--', alpha=0.5)
 plt.tight_layout()
@@ -190,9 +190,9 @@ st.pyplot(fig2, use_container_width=False)
 # ---------------------------
 # 🔍 중·고등학교 확대 비교
 # ---------------------------
-st.subheader("🔍 중·고등학교 연도별 추세 확대 분석")
+st.subheader("🔍 중·고등학교 연도별 이용자수 확대 분석")
 st.markdown("""
-중학교와 고등학교의 **세부 추세**를 확대하여 비교했습니다.
+중학교와 고등학교의 **세부 이용자수 추세**를 확대하여 비교했습니다.
 """)
 
 df_middle_high = df3_visit[df3_visit['학교급별(1)'].isin(['중학교', '고등학교'])]
@@ -200,16 +200,16 @@ df_middle_high = df3_visit[df3_visit['학교급별(1)'].isin(['중학교', '고�
 fig3, ax3 = plt.subplots(figsize=(6, 3.5))
 for school_type in ['중학교', '고등학교']:
     data = df_middle_high[df_middle_high['학교급별(1)'] == school_type]
-    ax3.plot(data['연도'], data['1관당 방문자수'],
+    ax3.plot(data['연도'], data['1관당 이용자수'],
              color=color_map[school_type],
              linestyle='-',
              marker='o',
              linewidth=2,
              label=school_type)
 
-ax3.set_title("중·고등학교 연도별 1관당 방문자수 추세 (확대)", fontproperties=font_prop)
+ax3.set_title("중·고등학교 연도별 1관당 이용자수 추세 (확대)", fontproperties=font_prop)
 ax3.set_xlabel("연도", fontproperties=font_prop)
-ax3.set_ylabel("1관당 방문자수", fontproperties=font_prop)
+ax3.set_ylabel("1관당 이용자수", fontproperties=font_prop)
 ax3.grid(True, linestyle='--', alpha=0.5)
 ax3.legend(prop=font_prop, loc='upper right')
 plt.tight_layout()
