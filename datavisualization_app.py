@@ -99,23 +99,33 @@ st.markdown("전국 학교도서관의 **연도별 1관당 방문자수** 변화
 # ✅ df3 전처리: 연도별로 1관당 방문자수 컬럼만 추출
 df3_clean = df3[df3['학교급별(1)'].isin(['초등학교', '중학교', '고등학교'])].copy()
 
-visit_cols = [col for col in df3_clean.columns if ".3" in col]  # e.g., 2011.3 ~ 2023.3
+visit_cols = [col for col in df3_clean.columns if ".3" in col]
 df3_visit = df3_clean[['학교급별(1)'] + visit_cols].copy()
 df3_visit = df3_visit.melt(id_vars='학교급별(1)', var_name='연도', value_name='1관당 방문자수')
 
 df3_visit['연도'] = df3_visit['연도'].str.replace('.3', '', regex=False).astype(int)
 df3_visit['1관당 방문자수'] = df3_visit['1관당 방문자수'].astype(float)
 
-# 꺾은선 그래프
+# ✅ 꺾은선 그래프(가독성 개선)
 fig2, ax2 = plt.subplots(figsize=(12, 6))
-for school_type in df3_visit['학교급별(1)'].unique():
+styles = {
+    '초등학교': {'color': 'green', 'linestyle': '-', 'marker': 'o', 'linewidth': 2.5},
+    '중학교': {'color': 'orange', 'linestyle': '--', 'marker': 's', 'linewidth': 2.5},
+    '고등학교': {'color': 'blue', 'linestyle': '-.', 'marker': 'D', 'linewidth': 2.5}
+}
+
+for school_type, style in styles.items():
     data = df3_visit[df3_visit['학교급별(1)'] == school_type]
-    ax2.plot(data['연도'], data['1관당 방문자수'], marker='o', linewidth=2, label=school_type)
+    ax2.plot(data['연도'], data['1관당 방문자수'], label=school_type, **style)
 
 ax2.set_title("연도별 학교급별 1관당 방문자수 추세", fontproperties=font_prop)
 ax2.set_xlabel("연도", fontproperties=font_prop)
 ax2.set_ylabel("1관당 방문자수", fontproperties=font_prop)
-ax2.legend(prop=font_prop)
+ax2.grid(True, linestyle='--', alpha=0.5)
+ax2.legend(prop=font_prop, loc='upper left')
+
+# y축 숫자 천단위 콤마
+ax2.get_yaxis().set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
 st.pyplot(fig2)
 
 # ---------------------------
