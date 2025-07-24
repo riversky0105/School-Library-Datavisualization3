@@ -118,11 +118,11 @@ st.markdown("학교 단위에서 **대출자수(이용자수)**에 영향을 주
 df_merge_renamed = df_merge.rename(columns={
     '1인당대출자료수': '1인당\n대출자료수',
     '장서수(인쇄)': '장서수\n(인쇄)',
-    '도서예산(자료구입비)': '도서예산\n(자료구입비)',
-    '사서수': '사서수'
+    '도서예산(자료구입비)': '도서예산\n(자료구입비)'
 })
 
-X = df_merge_renamed[['장서수', '사서수', '도서\n예산', '1인당\n대출']].copy()
+# ✅ X에서 rename된 컬럼명 그대로 사용
+X = df_merge_renamed[['장서수\n(인쇄)', '사서수', '도서예산\n(자료구입비)', '1인당\n대출자료수']].copy()
 y = df_merge_renamed['대출자수']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
