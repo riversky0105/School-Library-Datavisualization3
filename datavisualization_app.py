@@ -40,7 +40,7 @@ df1, df2, df3 = load_data()
 # ✅ 학교 단위 데이터 전처리
 # ---------------------------
 st.subheader("✅ 데이터 전처리 및 병합 상태")
-st.markdown("전국 및 서울시 학교 단위 데이터를 이용자수 중심으로 정리하여 분석에 활용합니다.")
+st.markdown("전국 및 서울시 학교 단위 데이터를 이용자수 중심으로 정리하여 분석합니다.")
 
 df1_clean = df1[['도서관명', '장서수(인쇄)', '사서수', '대출자수', '대출권수', '도서예산(자료구입비)']].copy()
 df1_clean.dropna(inplace=True)
@@ -99,7 +99,6 @@ df3_visit = df3_visit.melt(id_vars='학교급별(1)', var_name='연도', value_n
 df3_visit['연도'] = df3_visit['연도'].str.replace('.3', '', regex=False).astype(int)
 df3_visit['1관당 방문자수'] = df3_visit['1관당 방문자수'].astype(float)
 
-# ✅ 스타일: 초등/중등/고등 동일한 선스타일, 마커, Matplotlib 기본 색상
 color_map = {'초등학교': 'green', '중학교': 'orange', '고등학교': 'blue'}
 
 fig2, ax2 = plt.subplots(figsize=(12, 6))
@@ -118,7 +117,6 @@ ax2.set_ylabel("1관당 방문자수", fontproperties=font_prop)
 ax2.legend(prop=font_prop, loc='upper left')
 ax2.grid(True, linestyle='--', alpha=0.5)
 
-# y축 단위 설정
 y_min, y_max = df3_visit['1관당 방문자수'].min(), df3_visit['1관당 방문자수'].max()
 step = max(1000, (y_max - y_min) // 8)
 ax2.set_yticks(np.arange(0, y_max + step, step))
@@ -126,7 +124,7 @@ ax2.get_yaxis().set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format
 st.pyplot(fig2)
 
 # ---------------------------
-# 🔍 중·고등학교 확대 비교 보조 그래프
+# 🔍 중·고등학교 확대 비교
 # ---------------------------
 st.subheader("🔍 중·고등학교 확대 비교")
 st.markdown("중학교와 고등학교의 **세부 추세 비교**를 위해 별도의 확대 그래프를 추가했습니다.")
@@ -161,3 +159,31 @@ st.pyplot(fig3)
 st.subheader("📄 분석 데이터 테이블")
 st.markdown("학교 단위 분석 및 전국 추세 분석에 사용된 원천 데이터입니다.")
 st.dataframe(df_merge)
+
+# =====================================================
+# ✅ [추가 기능] 전체 연도 확률 분포표 및 기댓값·분산·표준편차
+# =====================================================
+st.subheader("📊 전체 연도 확률 분포표 및 기댓값·분산·표준편차")
+st.markdown("2011년부터 2023년까지의 학교급별 1관당 방문자수를 이용하여 확률분포와 통계량을 계산했습니다.")
+
+# 1) 전체 연도 데이터 변환
+visit_cols = [col for col in df3.columns if ".3" in col]
+df_all_visit = df3[df3['학교급별(1)'].isin(['초등학교', '중학교', '고등학교'])][['학교급별(1)'] + visit_cols].copy()
+df_all_visit = df_all_visit.melt(id_vars='학교급별(1)', var_name='연도', value_name='1관당 방문자수')
+
+df_all_visit['연도'] = df_all_visit['연도'].str.replace('.3', '', regex=False).astype(int)
+df_all_visit['1관당 방문자수'] = df_all_visit['1관당 방문자수'].astype(float)
+
+# 2) 확률분포, 기댓값, 분산, 표준편차 계산
+total_all = df_all_visit['1관당 방문자수'].sum()
+df_all_visit['확률(P)'] = df_all_visit['1관당 방문자수'] / total_all
+
+E_X_all = (df_all_visit['1관당 방문자수'] * df_all_visit['확률(P)']).sum()
+E_X2_all = ((df_all_visit['1관당 방문자수']**2) * df_all_visit['확률(P)']).sum()
+Var_X_all = E_X2_all - (E_X_all**2)
+Std_X_all = np.sqrt(Var_X_all)
+
+st.dataframe(df_all_visit.head())
+st.success(f"✅ **기댓값(E[X]) ≈ {E_X_all:,.2f}명**")
+st.info(f"✅ **분산(Var[X]) ≈ {Var_X_all:,.2f}**")
+st.warning(f"✅ **표준편차(σ[X]) ≈ {Std_X_all:,.2f}명**")
