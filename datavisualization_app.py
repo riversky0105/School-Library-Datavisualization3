@@ -39,9 +39,9 @@ df1, df2, df3 = load_data()
 # ---------------------------
 # 📊 전체 연도 확률 분포 및 기댓값·분산·표준편차
 # ---------------------------
-st.subheader("📊 전체 연도별 이용자수 분포와 통계값")
+st.subheader("📊 전체 연도별 학교도서관 이용자수 분포와 통계값")
 st.markdown("""
-2011년부터 2023년까지의 학교급별 **1관당 방문자수**를 하나의 확률 분포로 보고,  
+2011년부터 2023년까지의 학교급별 **1관당 이용자수**를 하나의 확률 분포로 보고,  
 이를 바탕으로 **기댓값(평균)**, **분산**, **표준편차**를 계산했습니다.  
 아래 표는 각 연도·학교급의 방문자수와 해당 비율(확률 P)을 보여줍니다.
 """)
@@ -51,13 +51,13 @@ df_all_visit = df3[df3['학교급별(1)'].isin(['초등학교', '중학교', '�
 df_all_visit = df_all_visit.melt(id_vars='학교급별(1)', var_name='연도', value_name='1관당 방문자수')
 
 df_all_visit['연도'] = df_all_visit['연도'].str.replace('.3', '', regex=False).astype(int)
-df_all_visit['1관당 방문자수'] = df_all_visit['1관당 방문자수'].astype(float)
+df_all_visit['1관당 이용자수'] = df_all_visit['1관당 이용자수'].astype(float)
 
-total_all = df_all_visit['1관당 방문자수'].sum()
-df_all_visit['확률(P)'] = df_all_visit['1관당 방문자수'] / total_all
+total_all = df_all_visit['1관당 이용자수'].sum()
+df_all_visit['확률(P)'] = df_all_visit['1관당 이용자수'] / total_all
 
-E_X_all = (df_all_visit['1관당 방문자수'] * df_all_visit['확률(P)']).sum()
-E_X2_all = ((df_all_visit['1관당 방문자수']**2) * df_all_visit['확률(P)']).sum()
+E_X_all = (df_all_visit['1관당 이용자수'] * df_all_visit['확률(P)']).sum()
+E_X2_all = ((df_all_visit['1관당 이용자수']**2) * df_all_visit['확률(P)']).sum()
 V_X_all = E_X2_all - (E_X_all**2)
 Std_X_all = np.sqrt(V_X_all)
 
@@ -66,14 +66,14 @@ st.dataframe(df_all_visit.head(), use_container_width=True, height=200)
 with st.expander("📐 계산 과정 자세히 보기"):
     st.markdown("""
     **✔ 기댓값(E[X])**  
-    각 방문자수 × 확률을 모두 더한 값입니다.
+    각 이용자수 × 확률을 모두 더한 값입니다.
     """)
     E_steps = [f"({row['1관당 방문자수']:,.0f}×{row['확률(P)']:.4f})" for _, row in df_all_visit.iterrows()]
     st.code("E[X] = " + " + ".join(E_steps) + f"\n= {E_X_all:,.2f}")
 
     st.markdown("""
     **✔ 분산(V[X])**  
-    각 방문자수의 제곱 × 확률을 모두 더한 값에서, (E[X])²을 뺀 값입니다.
+    각 이용자수의 제곱 × 확률을 모두 더한 값에서, (E[X])²을 뺀 값입니다.
     """)
     Var_steps = [f"({row['1관당 방문자수']:,.0f}²×{row['확률(P)']:.4f})" for _, row in df_all_visit.iterrows()]
     st.code("V[X] = " + " + ".join(Var_steps) +
@@ -114,9 +114,9 @@ st.dataframe(df_merge.head(), use_container_width=True, height=200)
 # ---------------------------
 # 🔍 변수 중요도 분석
 # ---------------------------
-st.subheader("🔍 학교 단위 변수 중요도 분석")
+st.subheader("🔍 학교 도서관 이용자수 변수 중요도 분석")
 st.markdown("""
-학교 단위에서 **대출자수(이용자수)**에 영향을 미치는 주요 요인을  
+**학교 도서관**의 **대출자수(이용자수)**에 영향을 미치는 요인을  
 **RandomForest 알고리즘**으로 분석했습니다.
 """)
 
