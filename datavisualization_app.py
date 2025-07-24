@@ -60,7 +60,8 @@ E_X2_all = ((df_all_visit['1관당 방문자수']**2) * df_all_visit['확률(P)'
 V_X_all = E_X2_all - (E_X_all**2)
 Std_X_all = np.sqrt(V_X_all)
 
-st.dataframe(df_all_visit.head(), use_container_width=False, height=200)
+# ✅ 표 크기를 아래 "데이터 전처리 및 병합 상태"와 동일하게 맞춤
+st.dataframe(df_all_visit.head(), use_container_width=True, height=200)
 
 with st.expander("📐 풀이 자세히 보기"):
     st.markdown("""
@@ -106,7 +107,7 @@ df_merge = pd.merge(
     how='inner'
 )
 
-st.dataframe(df_merge.head(), use_container_width=False, height=200)
+st.dataframe(df_merge.head(), use_container_width=True, height=200)
 
 # ---------------------------
 # 🔍 학교 단위: 변수 중요도 분석
@@ -114,7 +115,6 @@ st.dataframe(df_merge.head(), use_container_width=False, height=200)
 st.subheader("🔍 학교 단위: 변수 중요도 분석")
 st.markdown("학교 단위에서 **대출자수(이용자수)**에 영향을 주는 주요 요인을 분석했습니다.")
 
-# ✅ 변수명 2줄 줄바꿈으로 변환
 df_merge_renamed = df_merge.rename(columns={
     '1인당대출자료수': '1인당\n대출자료수',
     '장서수(인쇄)': '장서수\n(인쇄)',
@@ -175,7 +175,7 @@ for school_type in ['초등학교', '중학교', '고등학교']:
 ax2.set_title("연도별 학교급별 1관당 방문자수 추세", fontproperties=font_prop)
 ax2.set_xlabel("연도", fontproperties=font_prop)
 ax2.set_ylabel("1관당 방문자수", fontproperties=font_prop)
-ax2.legend(prop=font_prop, loc='upper right')  # ✅ 오른쪽 맨 위
+ax2.legend(prop=font_prop, loc='upper right')
 ax2.grid(True, linestyle='--', alpha=0.5)
 plt.tight_layout()
 st.pyplot(fig2, use_container_width=False)
@@ -202,7 +202,7 @@ ax3.set_title("중·고등학교 연도별 1관당 방문자수 추세 (확대)"
 ax3.set_xlabel("연도", fontproperties=font_prop)
 ax3.set_ylabel("1관당 방문자수", fontproperties=font_prop)
 ax3.grid(True, linestyle='--', alpha=0.5)
-ax3.legend(prop=font_prop, loc='upper right')  # ✅ 오른쪽 맨 위
+ax3.legend(prop=font_prop, loc='upper right')
 plt.tight_layout()
 st.pyplot(fig3, use_container_width=False)
 
