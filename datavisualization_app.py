@@ -183,22 +183,11 @@ Std_X_all = np.sqrt(Var_X_all)
 
 st.dataframe(df_all_visit.head())
 
-# ✅ 수식 출력
-st.markdown("""
-### 📐 계산 수식
-- **기댓값**  
-\\[
-E[X] = \\sum (x \\cdot P(X=x))
-\\]
-- **분산**  
-\\[
-Var[X] = \\sum (x^2 \\cdot P(X=x)) - (E[X])^2
-\\]
-- **표준편차**  
-\\[
-\\sigma[X] = \\sqrt{Var[X]}
-\\]
-""")
+# ✅ 수식 출력 (LaTeX 렌더링 적용)
+st.subheader("📐 계산 수식")
+st.latex(r"E[X] = \sum (x \cdot P(X=x))")
+st.latex(r"Var[X] = \sum (x^2 \cdot P(X=x)) - (E[X])^2")
+st.latex(r"\sigma[X] = \sqrt{Var[X]}")
 
 st.success(f"✅ **기댓값(E[X]) ≈ {E_X_all:,.2f}명**")
 st.info(f"✅ **분산(Var[X]) ≈ {Var_X_all:,.2f}**")
