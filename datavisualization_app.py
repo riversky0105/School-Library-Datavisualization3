@@ -19,6 +19,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 font_path = os.path.join(os.getcwd(), "fonts", "NanumGothicCoding.ttf")
 if os.path.exists(font_path):
     font_prop = fm.FontProperties(fname=font_path)
+    mpl.rcParams['font.family'] = font_prop.get_name()
     mpl.rcParams['axes.unicode_minus'] = False
 else:
     font_prop = None
@@ -46,7 +47,7 @@ df1_clean = df1[['도서관명', '장서수(인쇄)', '사서수', '대출자수
 df1_clean.dropna(inplace=True)
 
 # df2: 주요 변수 추출 및 결측치 제거
-df2_clean = df2[['학교명', '자료구입비예산액', '운영비예산액', '도서관대여학생수', '1인당대출자료수']].copy()
+df2_clean = df2[['학교명', '도서관대여학생수', '1인당대출자료수']].copy()
 df2_clean = df2_clean.dropna(subset=['도서관대여학생수'])
 
 # 병합 전 이름 통일 (학교명 기준)
@@ -65,9 +66,8 @@ st.subheader("🔍 학교 단위: 변수 중요도 분석")
 
 st.markdown("학교 단위에서 **대출자수(이용자수)**에 영향을 주는 주요 요인을 분석합니다.")
 
-# 종속변수(y): 대출자수
-# 독립변수(X): 장서수, 사서수, 예산, 1인당대출자료수 등
-X = df_merge[['장서수(인쇄)', '사서수', '도서예산(자료구입비)', '자료구입비예산액', '운영비예산액', '1인당대출자료수']].copy()
+# ✅ 운영비예산액, 자료구입비예산액 제거 후 변수 선택
+X = df_merge[['장서수(인쇄)', '사서수', '도서예산(자료구입비)', '1인당대출자료수']].copy()
 y = df_merge['대출자수']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -97,18 +97,28 @@ st.subheader("📈 전국 학교도서관 연도별 추세 분석")
 
 st.markdown("전국 학교도서관의 **연도별 1관당 방문자수** 변화를 학교급(초,중,고)별로 비교합니다.")
 
-# df3 전처리: 2023년 기준 열만 사용
-trend_cols = ['학교급별(1)', '2023.3']  # 2023.3 = 1관당 방문자 수
-df3_trend = df3[trend_cols].copy()
-df3_trend.columns = ['학교급', '1관당 방문자수']
-df3_trend = df3_trend[df3_trend['학교급'].isin(['초등학교', '중학교', '고등학교'])]
-df3_trend['1관당 방문자수'] = df3_trend['1관당 방문자수'].astype(float)
+# ✅ df3 전처리: 연도별로 1관당 방문자수 컬럼만 추출
+df3_clean = df3[df3['학교급별(1)'].isin(['초등학교', '중학교', '고등학교'])].copy()
 
-fig2, ax2 = plt.subplots(figsize=(6, 4))
-ax2.bar(df3_trend['학교급'], df3_trend['1관당 방문자수'], color='lightgreen')
-ax2.set_title("2023년 학교급별 1관당 방문자수", fontproperties=font_prop)
+# 연도별 방문자수 데이터만 선택
+visit_cols = [col for col in df3_clean.columns if ".3" in col]  # e.g., 2011.3, 2023.3
+df3_visit = df3_clean[['학교급별(1)'] + visit_cols].copy()
+df3_visit = df3_visit.melt(id_vars='학교급별(1)', var_name='연도', value_name='1관당 방문자수')
+
+# 연도 정리
+df3_visit['연도'] = df3_visit['연도'].str.replace('.3', '', regex=False).astype(int)
+df3_visit['1관당 방문자수'] = df3_visit['1관당 방문자수'].astype(float)
+
+# 꺾은선 그래프
+fig2, ax2 = plt.subplots(figsize=(10, 6))
+for school_type in df3_visit['학교급별(1)'].unique():
+    data = df3_visit[df3_visit['학교급별(1)'] == school_type]
+    ax2.plot(data['연도'], data['1관당 방문자수'], marker='o', label=school_type)
+
+ax2.set_title("연도별 학교급별 1관당 방문자수 추세", fontproperties=font_prop)
+ax2.set_xlabel("연도", fontproperties=font_prop)
 ax2.set_ylabel("1관당 방문자수", fontproperties=font_prop)
-ax2.set_xlabel("학교급", fontproperties=font_prop)
+ax2.legend(prop=font_prop)
 st.pyplot(fig2)
 
 # ---------------------------
