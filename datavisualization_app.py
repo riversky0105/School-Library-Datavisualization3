@@ -164,7 +164,10 @@ st.dataframe(df_merge)
 # ✅ [추가 기능] 전체 연도 확률 분포표 및 기댓값·분산·표준편차 (풀이 자세히 보기)
 # =====================================================
 st.subheader("📊 전체 연도 확률 분포표 및 기댓값·분산·표준편차")
-st.markdown("2011년부터 2023년까지의 학교급별 1관당 방문자수를 이용하여 **풀이 과정을 자세히 볼 수 있습니다.**")
+st.markdown("""
+2011년부터 2023년까지의 학교급별 1관당 방문자수를 **하나의 확률 분포**로 보고 계산했습니다.  
+아래 표는 각 연도·학교급의 방문자수와 그 비율(확률 P)을 나타냅니다.
+""")
 
 visit_cols = [col for col in df3.columns if ".3" in col]
 df_all_visit = df3[df3['학교급별(1)'].isin(['초등학교', '중학교', '고등학교'])][['학교급별(1)'] + visit_cols].copy()
@@ -184,27 +187,26 @@ Std_X_all = np.sqrt(V_X_all)
 st.dataframe(df_all_visit.head())
 
 with st.expander("📐 풀이 자세히 보기"):
-    # 기댓값 풀이
-    E_steps = [f"({row['1관당 방문자수']:,.1f}×{row['확률(P)']:.4f})" for _, row in df_all_visit.iterrows()]
-    E_detail = " + ".join(E_steps)
-
-    # 분산 풀이
-    Var_steps = [f"({row['1관당 방문자수']:,.1f}²×{row['확률(P)']:.4f})" for _, row in df_all_visit.iterrows()]
-    Var_detail = " + ".join(Var_steps)
-
-    st.markdown(f"""
-    **기댓값(E[X])**  
-    E[X] = {E_detail}  
-    = **{E_X_all:,.2f}**
-
-    **분산(V[X])**  
-    V[X] = {Var_detail} - (E[X])²  
-    = {E_X2_all:,.2f} - ({E_X_all:,.2f})²  
-    = **{V_X_all:,.2f}**
-
-    **표준편차(σ[X])**  
-    σ[X] = √V[X] = √{V_X_all:,.2f} ≈ **{Std_X_all:,.2f}**
+    st.markdown("""
+    **✔ 기댓값(E[X])**  
+    각 방문자수 × 확률을 모두 더한 값입니다.
     """)
+    E_steps = [f"({row['1관당 방문자수']:,.0f}×{row['확률(P)']:.4f})" for _, row in df_all_visit.iterrows()]
+    st.code("E[X] = " + " + ".join(E_steps) + f"\n= {E_X_all:,.2f}")
+
+    st.markdown("""
+    **✔ 분산(V[X])**  
+    각 방문자수의 제곱 × 확률을 모두 더한 값에서, (E[X])²을 뺀 값입니다.
+    """)
+    Var_steps = [f"({row['1관당 방문자수']:,.0f}²×{row['확률(P)']:.4f})" for _, row in df_all_visit.iterrows()]
+    st.code("V[X] = " + " + ".join(Var_steps) +
+            f"\n- (E[X])²\n= {E_X2_all:,.2f} - ({E_X_all:,.2f})²\n= {V_X_all:,.2f}")
+
+    st.markdown("""
+    **✔ 표준편차(σ[X])**  
+    분산의 양의 제곱근입니다.
+    """)
+    st.code(f"σ[X] = √V[X] = √{V_X_all:,.2f} ≈ {Std_X_all:,.2f}")
 
 st.success(f"✅ **기댓값(E[X]) ≈ {E_X_all:,.2f}명**")
 st.info(f"✅ **분산(V[X]) ≈ {V_X_all:,.2f}**")
