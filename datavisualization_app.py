@@ -60,7 +60,6 @@ E_X2_all = ((df_all_visit['1관당 방문자수']**2) * df_all_visit['확률(P)'
 V_X_all = E_X2_all - (E_X_all**2)
 Std_X_all = np.sqrt(V_X_all)
 
-# ✅ 표 크기 조정
 st.dataframe(df_all_visit.head(), use_container_width=False, height=200)
 
 with st.expander("📐 풀이 자세히 보기"):
@@ -115,8 +114,16 @@ st.dataframe(df_merge.head(), use_container_width=False, height=200)
 st.subheader("🔍 학교 단위: 변수 중요도 분석")
 st.markdown("학교 단위에서 **대출자수(이용자수)**에 영향을 주는 주요 요인을 분석했습니다.")
 
-X = df_merge[['장서수(인쇄)', '사서수', '도서예산(자료구입비)', '1인당대출자료수']].copy()
-y = df_merge['대출자수']
+# ✅ 변수명 2줄 줄바꿈으로 변환
+df_merge_renamed = df_merge.rename(columns={
+    '1인당대출자료수': '1인당\n대출',
+    '장서수(인쇄)': '장서수',
+    '도서예산(자료구입비)': '도서\n예산',
+    '사서수': '사서수'
+})
+
+X = df_merge_renamed[['장서수', '사서수', '도서\n예산', '1인당\n대출']].copy()
+y = df_merge_renamed['대출자수']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
@@ -130,12 +137,13 @@ r2 = r2_score(y_test, y_pred)
 st.success(f"✅ 예측 오차(MSE): **{mse:,.0f}** | 정확도(R²): **{r2:.4f}**")
 
 importance = pd.Series(model.feature_importances_, index=X.columns)
-fig, ax = plt.subplots(figsize=(6, 3.5))  # ✅ 크기 조정
+
+fig, ax = plt.subplots(figsize=(6, 3.5))  # ✅ 그래프 크기 유지
 importance.sort_values().plot.barh(ax=ax, color='skyblue')
-ax.set_title("학교 단위: RandomForest 변수 중요도", fontproperties=font_prop)
-ax.set_xlabel("중요도", fontproperties=font_prop)
-ax.set_ylabel("변수", fontproperties=font_prop)
-ax.set_yticklabels(importance.sort_values().index, fontproperties=font_prop)
+ax.set_title("학교 단위: RandomForest 변수 중요도", fontproperties=font_prop, fontsize=12)
+ax.set_xlabel("중요도", fontproperties=font_prop, fontsize=10)
+ax.set_ylabel("변수", fontproperties=font_prop, fontsize=10)
+ax.set_yticklabels(importance.sort_values().index, fontproperties=font_prop, fontsize=10)
 plt.tight_layout()
 st.pyplot(fig, use_container_width=False)
 
@@ -155,7 +163,7 @@ df3_visit['1관당 방문자수'] = df3_visit['1관당 방문자수'].astype(flo
 
 color_map = {'초등학교': 'green', '중학교': 'orange', '고등학교': 'blue'}
 
-fig2, ax2 = plt.subplots(figsize=(6, 3.5))  # ✅ 크기 조정
+fig2, ax2 = plt.subplots(figsize=(6, 3.5))
 for school_type in ['초등학교', '중학교', '고등학교']:
     data = df3_visit[df3_visit['학교급별(1)'] == school_type]
     ax2.plot(data['연도'], data['1관당 방문자수'],
@@ -181,7 +189,7 @@ st.markdown("중학교와 고등학교의 **세부 추세 비교**를 위해 별
 
 df_middle_high = df3_visit[df3_visit['학교급별(1)'].isin(['중학교', '고등학교'])]
 
-fig3, ax3 = plt.subplots(figsize=(6, 3.5))  # ✅ 크기 조정
+fig3, ax3 = plt.subplots(figsize=(6, 3.5))
 for school_type in ['중학교', '고등학교']:
     data = df_middle_high[df_middle_high['학교급별(1)'] == school_type]
     ax3.plot(data['연도'], data['1관당 방문자수'],
