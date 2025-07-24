@@ -106,7 +106,7 @@ df3_visit = df3_visit.melt(id_vars='학교급별(1)', var_name='연도', value_n
 df3_visit['연도'] = df3_visit['연도'].str.replace('.3', '', regex=False).astype(int)
 df3_visit['1관당 방문자수'] = df3_visit['1관당 방문자수'].astype(float)
 
-# ✅ 꺾은선 그래프(가독성 개선)
+# ✅ 꺾은선 그래프(세로축 단위 폭 개선)
 fig2, ax2 = plt.subplots(figsize=(12, 6))
 styles = {
     '초등학교': {'color': 'green', 'linestyle': '-', 'marker': 'o', 'linewidth': 2.5},
@@ -124,9 +124,40 @@ ax2.set_ylabel("1관당 방문자수", fontproperties=font_prop)
 ax2.grid(True, linestyle='--', alpha=0.5)
 ax2.legend(prop=font_prop, loc='upper left')
 
-# y축 숫자 천단위 콤마
+# ✅ 세로축 단위 폭을 넓히기
+y_min, y_max = df3_visit['1관당 방문자수'].min(), df3_visit['1관당 방문자수'].max()
+step = max(1000, (y_max - y_min) // 8)
+ax2.set_yticks(np.arange(0, y_max + step, step))
+
 ax2.get_yaxis().set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
 st.pyplot(fig2)
+
+# ---------------------------
+# 🔍 중·고등학교 확대 비교 보조 그래프
+# ---------------------------
+st.subheader("🔍 중·고등학교 확대 비교")
+st.markdown("중학교와 고등학교의 **세부 추세 비교**를 위해 별도의 확대 그래프를 추가했습니다.")
+
+df_middle_high = df3_visit[df3_visit['학교급별(1)'].isin(['중학교', '고등학교'])]
+
+fig3, ax3 = plt.subplots(figsize=(10, 5))
+for school_type, style in styles.items():
+    if school_type in ['중학교', '고등학교']:
+        data = df_middle_high[df_middle_high['학교급별(1)'] == school_type]
+        ax3.plot(data['연도'], data['1관당 방문자수'], label=school_type, **style)
+
+ax3.set_title("중·고등학교 연도별 1관당 방문자수 추세 (확대)", fontproperties=font_prop)
+ax3.set_xlabel("연도", fontproperties=font_prop)
+ax3.set_ylabel("1관당 방문자수", fontproperties=font_prop)
+ax3.grid(True, linestyle='--', alpha=0.5)
+ax3.legend(prop=font_prop, loc='upper left')
+
+# y축 자동 확대 범위 설정
+y_min, y_max = df_middle_high['1관당 방문자수'].min(), df_middle_high['1관당 방문자수'].max()
+step = max(500, (y_max - y_min) // 8)
+ax3.set_yticks(np.arange(0, y_max + step, step))
+ax3.get_yaxis().set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
+st.pyplot(fig3)
 
 # ---------------------------
 # 📄 데이터 테이블 출력
