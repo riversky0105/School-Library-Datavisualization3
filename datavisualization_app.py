@@ -60,8 +60,8 @@ E_X2_all = ((df_all_visit['1관당 방문자수']**2) * df_all_visit['확률(P)'
 V_X_all = E_X2_all - (E_X_all**2)
 Std_X_all = np.sqrt(V_X_all)
 
-# ✅ 표 크기 조정: 높이 제한
-st.dataframe(df_all_visit.head(10), height=250)
+# ✅ 표 크기 조정
+st.dataframe(df_all_visit.head(), use_container_width=False, height=200)
 
 with st.expander("📐 풀이 자세히 보기"):
     st.markdown("""
@@ -94,7 +94,6 @@ st.warning(f"✅ **표준편차(σ[X]) ≈ {Std_X_all:,.2f}명**")
 # ---------------------------
 st.subheader("✅ 데이터 전처리 및 병합 상태")
 st.markdown("전국 및 서울시 학교 단위 데이터를 이용자수 중심으로 정리하여 분석합니다.")
-st.dataframe(df1.head(10), height=250)  # ✅ 표 크기 축소
 
 df1_clean = df1[['도서관명', '장서수(인쇄)', '사서수', '대출자수', '대출권수', '도서예산(자료구입비)']].copy()
 df1_clean.dropna(inplace=True)
@@ -107,7 +106,8 @@ df_merge = pd.merge(
     left_on='도서관명', right_on='학교명',
     how='inner'
 )
-st.dataframe(df_merge.head(10), height=250)  # ✅ 표 크기 축소
+
+st.dataframe(df_merge.head(), use_container_width=False, height=200)
 
 # ---------------------------
 # 🔍 학교 단위: 변수 중요도 분석
@@ -130,11 +130,12 @@ r2 = r2_score(y_test, y_pred)
 st.success(f"✅ 예측 오차(MSE): **{mse:,.0f}** | 정확도(R²): **{r2:.4f}**")
 
 importance = pd.Series(model.feature_importances_, index=X.columns)
-fig, ax = plt.subplots(figsize=(6, 3.5))  # ✅ 크기 축소
+fig, ax = plt.subplots(figsize=(6, 3.5))  # ✅ 크기 조정
 importance.sort_values().plot.barh(ax=ax, color='skyblue')
-ax.set_title("학교 단위: RandomForest 변수 중요도", fontproperties=font_prop, fontsize=12)
-ax.set_xlabel("중요도", fontproperties=font_prop, fontsize=10)
-ax.set_ylabel("변수", fontproperties=font_prop, fontsize=10)
+ax.set_title("학교 단위: RandomForest 변수 중요도", fontproperties=font_prop)
+ax.set_xlabel("중요도", fontproperties=font_prop)
+ax.set_ylabel("변수", fontproperties=font_prop)
+ax.set_yticklabels(importance.sort_values().index, fontproperties=font_prop)
 plt.tight_layout()
 st.pyplot(fig, use_container_width=False)
 
@@ -154,7 +155,7 @@ df3_visit['1관당 방문자수'] = df3_visit['1관당 방문자수'].astype(flo
 
 color_map = {'초등학교': 'green', '중학교': 'orange', '고등학교': 'blue'}
 
-fig2, ax2 = plt.subplots(figsize=(6, 3.5))  # ✅ 크기 축소
+fig2, ax2 = plt.subplots(figsize=(6, 3.5))  # ✅ 크기 조정
 for school_type in ['초등학교', '중학교', '고등학교']:
     data = df3_visit[df3_visit['학교급별(1)'] == school_type]
     ax2.plot(data['연도'], data['1관당 방문자수'],
@@ -164,10 +165,10 @@ for school_type in ['초등학교', '중학교', '고등학교']:
              linewidth=2,
              label=school_type)
 
-ax2.set_title("연도별 학교급별 1관당 방문자수 추세", fontproperties=font_prop, fontsize=12)
-ax2.set_xlabel("연도", fontproperties=font_prop, fontsize=10)
-ax2.set_ylabel("1관당 방문자수", fontproperties=font_prop, fontsize=10)
-ax2.legend(prop=font_prop, fontsize=10, loc='upper left')
+ax2.set_title("연도별 학교급별 1관당 방문자수 추세", fontproperties=font_prop)
+ax2.set_xlabel("연도", fontproperties=font_prop)
+ax2.set_ylabel("1관당 방문자수", fontproperties=font_prop)
+ax2.legend(prop=font_prop, loc='upper left')
 ax2.grid(True, linestyle='--', alpha=0.5)
 plt.tight_layout()
 st.pyplot(fig2, use_container_width=False)
@@ -180,7 +181,7 @@ st.markdown("중학교와 고등학교의 **세부 추세 비교**를 위해 별
 
 df_middle_high = df3_visit[df3_visit['학교급별(1)'].isin(['중학교', '고등학교'])]
 
-fig3, ax3 = plt.subplots(figsize=(6, 3.5))  # ✅ 크기 축소
+fig3, ax3 = plt.subplots(figsize=(6, 3.5))  # ✅ 크기 조정
 for school_type in ['중학교', '고등학교']:
     data = df_middle_high[df_middle_high['학교급별(1)'] == school_type]
     ax3.plot(data['연도'], data['1관당 방문자수'],
@@ -190,10 +191,10 @@ for school_type in ['중학교', '고등학교']:
              linewidth=2,
              label=school_type)
 
-ax3.set_title("중·고등학교 연도별 1관당 방문자수 추세 (확대)", fontproperties=font_prop, fontsize=12)
-ax3.set_xlabel("연도", fontproperties=font_prop, fontsize=10)
-ax3.set_ylabel("1관당 방문자수", fontproperties=font_prop, fontsize=10)
+ax3.set_title("중·고등학교 연도별 1관당 방문자수 추세 (확대)", fontproperties=font_prop)
+ax3.set_xlabel("연도", fontproperties=font_prop)
+ax3.set_ylabel("1관당 방문자수", fontproperties=font_prop)
 ax3.grid(True, linestyle='--', alpha=0.5)
-ax3.legend(prop=font_prop, fontsize=10, loc='upper left')
+ax3.legend(prop=font_prop, loc='upper left')
 plt.tight_layout()
 st.pyplot(fig3, use_container_width=False)
