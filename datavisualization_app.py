@@ -175,7 +175,7 @@ for school_type in ['초등학교', '중학교', '고등학교']:
 ax2.set_title("연도별 학교급별 1관당 방문자수 추세", fontproperties=font_prop)
 ax2.set_xlabel("연도", fontproperties=font_prop)
 ax2.set_ylabel("1관당 방문자수", fontproperties=font_prop)
-ax2.legend(prop=font_prop, loc='upper right')  # ✅ 오른쪽 맨 위로 변경
+ax2.legend(prop=font_prop, loc='upper right')  # ✅ 오른쪽 맨 위
 ax2.grid(True, linestyle='--', alpha=0.5)
 plt.tight_layout()
 st.pyplot(fig2, use_container_width=False)
@@ -202,6 +202,28 @@ ax3.set_title("중·고등학교 연도별 1관당 방문자수 추세 (확대)"
 ax3.set_xlabel("연도", fontproperties=font_prop)
 ax3.set_ylabel("1관당 방문자수", fontproperties=font_prop)
 ax3.grid(True, linestyle='--', alpha=0.5)
-ax3.legend(prop=font_prop, loc='upper right')  # ✅ 오른쪽 맨 위로 변경
+ax3.legend(prop=font_prop, loc='upper right')  # ✅ 오른쪽 맨 위
 plt.tight_layout()
 st.pyplot(fig3, use_container_width=False)
+
+# ---------------------------
+# 📝 결론 추가
+# ---------------------------
+st.subheader("📝 결론: 학교도서관 이용자수에 영향을 미치는 요인")
+st.markdown("""
+학교도서관 이용자수 분석 결과 및 기존 연구를 종합하면 다음과 같습니다.
+
+### 1. 머신러닝(RandomForest) 분석 결과
+- **1인당 대출자료수**가 가장 큰 영향을 미쳤으며,  
+  그다음으로 **장서수(인쇄)**, **도서예산(자료구입비)**, **사서수** 순으로 중요도가 나타났습니다.
+
+### 2. 기존 연구(인터넷 조사) 결과
+- **하드웨어 요인**: 최신 자료 확보, IC 공간, 좌석 및 e-book 접근성
+- **소프트웨어 요인**: 독서 프로그램, 학습 워크숍, 정보 리터러시 교육
+- **인적 서비스 요인**: 상시 사서 교사 배치, 질 높은 안내 및 지원
+- **심리적 요인**: 학생의 내적 동기 고취, 도서관 불안감 해소
+
+### ✅ 시사점
+학교도서관의 이용자수를 높이기 위해서는 **자료와 예산 확충**, **독서·학습 프로그램 운영**,  
+**사서 교사의 적극적인 참여**, **학생 친화적 공간 조성** 등이 함께 이루어져야 합니다.
+""")
