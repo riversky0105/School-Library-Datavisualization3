@@ -1,7 +1,7 @@
 import streamlit as st
 st.set_page_config(page_title="학교도서관 이용자수 영향 요인 분석", layout="wide")
 
-st.title("📚 전국 및 서울시 학교도서관 이용자수 영향 요인 분석")
+st.title("📚 전국 및 서울시 학교도서관 이용자수 분석 및 예측")
 
 import pandas as pd
 import numpy as np
@@ -37,10 +37,10 @@ def load_data():
 df1, df2, df3 = load_data()
 
 # ---------------------------
-# ✅ 데이터 전처리 (학교 단위)
+# ✅ 학교 단위 데이터 전처리
 # ---------------------------
-st.subheader("✅ 데이터 전처리 상태")
-st.markdown("전국 및 서울시 학교 단위 데이터를 이용자수 중심으로 정리합니다.")
+st.subheader("✅ 데이터 전처리 및 병합 상태")
+st.markdown("전국 및 서울시 학교 단위 데이터를 이용자수 중심으로 정리하여 분석에 활용합니다.")
 
 # df1: 주요 변수 추출 및 결측치 제거
 df1_clean = df1[['도서관명', '장서수(인쇄)', '사서수', '대출자수', '대출권수', '도서예산(자료구입비)']].copy()
@@ -57,14 +57,13 @@ df_merge = pd.merge(
     how='inner'
 )
 
-st.write("📄 병합된 데이터 샘플", df_merge.head())
+st.dataframe(df_merge.head())
 
 # ---------------------------
-# ✅ 학교 단위 분석: 변수 중요도
+# 🔍 학교 단위: 변수 중요도 분석
 # ---------------------------
 st.subheader("🔍 학교 단위: 변수 중요도 분석")
-
-st.markdown("학교 단위에서 **대출자수(이용자수)**에 영향을 주는 주요 요인을 분석합니다.")
+st.markdown("학교 단위에서 **대출자수(이용자수)**에 영향을 주는 주요 요인을 분석했습니다.")
 
 # ✅ 운영비예산액, 자료구입비예산액 제거 후 변수 선택
 X = df_merge[['장서수(인쇄)', '사서수', '도서예산(자료구입비)', '1인당대출자료수']].copy()
@@ -78,11 +77,12 @@ y_pred = model.predict(X_test)
 
 mse = mean_squared_error(y_test, y_pred)
 r2 = r2_score(y_test, y_pred)
-st.markdown(f"✅ **예측 오차(MSE)**: `{mse:,.0f}` | **정확도(R²)**: `{r2:.4f}`")
+
+st.success(f"✅ 예측 오차(MSE): **{mse:,.0f}** | 정확도(R²): **{r2:.4f}**")
 
 # 변수 중요도 시각화
 importance = pd.Series(model.feature_importances_, index=X.columns)
-fig, ax = plt.subplots(figsize=(8, 5))
+fig, ax = plt.subplots(figsize=(10, 6))
 importance.sort_values().plot.barh(ax=ax, color='skyblue')
 ax.set_title("학교 단위: RandomForest 변수 중요도", fontproperties=font_prop)
 ax.set_xlabel("중요도", fontproperties=font_prop)
@@ -91,29 +91,26 @@ ax.set_yticklabels(importance.sort_values().index, fontproperties=font_prop)
 st.pyplot(fig)
 
 # ---------------------------
-# ✅ 전국 추세 분석(df3 활용)
+# 📈 전국 학교도서관 연도별 추세 분석
 # ---------------------------
 st.subheader("📈 전국 학교도서관 연도별 추세 분석")
-
-st.markdown("전국 학교도서관의 **연도별 1관당 방문자수** 변화를 학교급(초,중,고)별로 비교합니다.")
+st.markdown("전국 학교도서관의 **연도별 1관당 방문자수** 변화를 학교급(초,중,고)별로 비교했습니다.")
 
 # ✅ df3 전처리: 연도별로 1관당 방문자수 컬럼만 추출
 df3_clean = df3[df3['학교급별(1)'].isin(['초등학교', '중학교', '고등학교'])].copy()
 
-# 연도별 방문자수 데이터만 선택
-visit_cols = [col for col in df3_clean.columns if ".3" in col]  # e.g., 2011.3, 2023.3
+visit_cols = [col for col in df3_clean.columns if ".3" in col]  # e.g., 2011.3 ~ 2023.3
 df3_visit = df3_clean[['학교급별(1)'] + visit_cols].copy()
 df3_visit = df3_visit.melt(id_vars='학교급별(1)', var_name='연도', value_name='1관당 방문자수')
 
-# 연도 정리
 df3_visit['연도'] = df3_visit['연도'].str.replace('.3', '', regex=False).astype(int)
 df3_visit['1관당 방문자수'] = df3_visit['1관당 방문자수'].astype(float)
 
 # 꺾은선 그래프
-fig2, ax2 = plt.subplots(figsize=(10, 6))
+fig2, ax2 = plt.subplots(figsize=(12, 6))
 for school_type in df3_visit['학교급별(1)'].unique():
     data = df3_visit[df3_visit['학교급별(1)'] == school_type]
-    ax2.plot(data['연도'], data['1관당 방문자수'], marker='o', label=school_type)
+    ax2.plot(data['연도'], data['1관당 방문자수'], marker='o', linewidth=2, label=school_type)
 
 ax2.set_title("연도별 학교급별 1관당 방문자수 추세", fontproperties=font_prop)
 ax2.set_xlabel("연도", fontproperties=font_prop)
@@ -122,7 +119,7 @@ ax2.legend(prop=font_prop)
 st.pyplot(fig2)
 
 # ---------------------------
-# ✅ 데이터 테이블 출력
+# 📄 데이터 테이블 출력
 # ---------------------------
 st.subheader("📄 분석 데이터 테이블")
 st.markdown("학교 단위 분석 및 전국 추세 분석에 사용된 원천 데이터입니다.")
